@@ -1,0 +1,97 @@
+datatype String
+datatype int
+datatype float
+
+@functionalTags(full_text_search)
+@nFunctionalTags(read_scalability)
+entity Song  {
+	name : String
+	oid : String
+	title : String
+	year: int
+	artist : String
+	artist_id : String
+	tracks :-> Track [0..*]
+}
+
+@nFunctionalTags(consistency)
+entity Customer {
+	oid : String 
+	name : String 
+	details -> CustomerDetails[ 1 ] 
+}
+
+entity CustomerDetails {
+	oid : String
+	name : String
+	surname : String
+	city : String
+}
+
+@nFunctionalTags(read_scalability)
+entity Track {
+	oid : String
+	number : int
+	length : int
+	name : int
+}
+
+entity Clerance {
+	name : String
+	key : String
+	clarence : float
+}
+
+entity Similarity  {
+	name : String
+	values : float
+	source -> Song[1]
+	target -> Song[1]
+}
+
+
+@functionalTags(sorting, full_text_search)
+@nFunctionalTags(consistency)
+entity Inventory{
+	oid : String
+	band : String
+	name : String
+}
+
+@nFunctionalTags(consistency)
+entity PurchaseDetails {
+	custormer -> Customer[1]
+	inventories -> Inventory[1]
+}
+
+relationaldb MySQL{
+	tables {
+		table {Inventory_Table : Inventory idSpec ("Inventory.oid")}
+		table {Customer_Table : Customer}
+		table {PurchaseDetails_Table : PurchaseDetails}	
+	}
+}
+
+documentdb MongoDB {
+	collections {
+		Song_Collection : Song
+		CustomerDetails_Collection : CustomerDetails
+	}
+}
+
+keyvaluedb KeyValue{
+	elements {
+		clarence {
+				song_id -> ("Song.oid","Clerance.clarence")
+		}
+	}
+}
+
+graphdb Neo4J{
+	edges {
+		edge Similarity {
+			from source
+			to target
+		}
+	}
+}
